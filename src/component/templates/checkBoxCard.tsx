@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Card } from '../moleclues/card';
 import { CheckBoxInput } from '../moleclues/checkBoxInput';
 import CheckBox from '../atoms/checkBox';
@@ -26,13 +26,19 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
   isChecked,
   handleCheck,
 }) => {
-  const handleChangeCheck = (checked: boolean) => {
-    handleCheck(id, checked);
-  };
+  const handleChangeCheck = useCallback(
+    (checked: boolean) => {
+      handleCheck(id, checked);
+    },
+    [handleCheck, id]
+  );
 
-  const handleChangeTextInput = (textInput: string) => {
-    handleTextInput(id, textInput);
-  };
+  const handleChangeTextInput = useCallback(
+    (textInput: string) => {
+      handleTextInput(id, textInput);
+    },
+    [handleTextInput, id]
+  );
 
   return (
     <div>

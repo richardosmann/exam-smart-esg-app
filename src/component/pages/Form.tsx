@@ -78,46 +78,32 @@ export const Form: React.FC = () => {
     )
   );
 
-  Questions.reduce(
-    (acc, question) => {
-      const key = `answer${question.id}` as `answer${string}`;
-      acc[key] = yup
-        .string()
-        .required(NO_TEXT_ERROR_MESSAGE)
-        .max(MAX_LENGTH, `${MAX_LENGTH}${MAX_LENGTH_ERROR_MESSAGE}`);
-      return acc;
-    },
-    {} as Record<
-      `answer${string}`,
-      yup.StringSchema<string | undefined, yup.AnyObject>
-    >
-  );
-
   watch();
-  const onSubmit: SubmitHandler<Answers> = async textAreaData => {
-    const textAreaAnswers = TextAreaQuestions.map((question: Question) => {
-      const key = `answer${question.id}` as keyof Answers;
-      const answer = key.length > 0 ? textAreaData[key] : null;
-      if (question.answer) {
-        question.answer.textArea = answer;
-      }
-      return question;
-    });
-    const checkBoxAnswers = CheckBoxQuestions.map((question: Question) => {
-      const answer = checkBoxInputState[question.id];
-      if (question.answer) {
-        question.answer.optionState = answer.checkedState;
-        if (answer.isChecked) question.answer.inputText = answer.inputText;
-        else question.answer.inputText = '';
-      }
-      return question;
-    });
-    const data = {
-      textAreaAnswers,
-      checkBoxAnswers,
-    };
-    await API.submit(data);
-  };
+  const onSubmit: SubmitHandler<Answers> = useCallback(
+    async textAreaData => {
+      const answers = (Questions as Question[]).map((question: Question) => {
+        if (question.qaFormat === QAFormat.TEXT) {
+          const key = `answer${question.id}` as keyof Answers;
+          const answer = key.length > 0 ? textAreaData[key] : null;
+          if (question.answer) {
+            question.answer.textArea = answer;
+          }
+          return question;
+        }
+        if (question.qaFormat === QAFormat.CHECKBOX) {
+          const answer = checkBoxInputState[question.id];
+          if (question.answer) {
+            question.answer.optionState = answer.checkedState;
+            if (answer.isChecked) question.answer.inputText = answer.inputText;
+            else question.answer.inputText = '';
+          }
+          return question;
+        }
+      });
+      await API.submit(answers);
+    },
+    [checkBoxInputState]
+  );
 
   const handleCheck = useCallback((id: string, checked: boolean) => {
     setCheckBoxInputState(prevState => {
@@ -162,7 +148,7 @@ export const Form: React.FC = () => {
         <NavBar buttonText="回答を保存" />
         <div className="w-full max-w-[1280px] bg-gray-100 pt-10 px-[120px]">
           {(Questions as Question[]).map((question: Question) => {
-            if (question.qaFormat === 'TEXT')
+            if (question.qaFormat === QAFormat.TEXT)
               return (
                 <div key={question.id} className="pb-7">
                   <TextAreaCard
@@ -176,7 +162,7 @@ export const Form: React.FC = () => {
                   />
                 </div>
               );
-            if (question.qaFormat === 'CHECKBOX')
+            if (question.qaFormat === QAFormat.CHECKBOX)
               return (
                 <div key={question.id} className="pb-7">
                   <CheckBoxCard

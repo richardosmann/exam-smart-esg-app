@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 interface CheckBoxProps {
   id: string;
@@ -9,10 +9,13 @@ interface CheckBoxProps {
 const CheckBox: React.FC<CheckBoxProps> = ({ id, name, handleCheck }) => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
 
-  const handleChange = () => {
-    setIsChecked(!isChecked);
-    handleCheck(!isChecked);
-  };
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setIsChecked(event.target.checked);
+      handleCheck(event.target.checked);
+    },
+    [setIsChecked, handleCheck]
+  );
 
   return (
     <div className="w-[42px] h-[42px] p-3">

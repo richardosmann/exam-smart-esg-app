@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import classNames from 'classnames';
 import { Controller, Control, FieldErrors } from 'react-hook-form';
 import { Answers } from '../pages/Form';
@@ -22,11 +22,10 @@ export const TextArea: React.FC<TextAreaProps> = ({
 }) => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
-  const handleFocus = () => setIsFocused(true);
-  const handleBlur = () => {
+  const handleBlur = useCallback(() => {
     setIsFocused(false);
     trigger(`answer${index}`);
-  };
+  }, [index, setIsFocused, trigger]);
 
   const labelColorClass = errors[`answer${index}`]
     ? 'text-red-500'
@@ -76,7 +75,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
             <>
               <textarea
                 {...field}
-                onFocus={handleFocus}
+                onFocus={() => setIsFocused(true)}
                 onBlur={handleBlur}
                 className={textAreaClasses}
                 placeholder=""
