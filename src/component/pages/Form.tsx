@@ -25,7 +25,11 @@ export interface Answers {
   [key: `answer${string}`]: string | undefined;
 }
 
-const dynamicSchema = Questions.reduce(
+export interface CheckBoxAnswers {
+  [key: string]: CheckBoxCardInputProps;
+}
+
+const dynamicSchema = TextAreaQuestions.reduce(
   (acc, question) => {
     const key = `answer${question.id}` as `answer${string}`;
     acc[key] = yup
@@ -60,34 +64,64 @@ export const Form: React.FC = () => {
     mode: 'all',
   });
 
-  const [checkBoxInputState, setCheckBoxInputState] = useState<
-    CheckBoxCardInputProps[]
-  >(
-    Array.from({ length: Questions.length }, (_, index: number) => ({
-      checkedState: new Array(Questions[index].options.length).fill(false),
-      isChecked: false,
-      inputText: '',
-    }))
+  const [checkBoxInputState, setCheckBoxInputState] = useState<CheckBoxAnswers>(
+    CheckBoxQuestions.reduce(
+      (box, question) => {
+        box[question.id] = {
+          checkedState: new Array(question.options.length).fill(false),
+          isChecked: false,
+          inputText: '',
+        };
+        return box;
+      },
+      {} as Record<string, CheckBoxCardInputProps>
+    )
+  );
+
+  Questions.reduce(
+    (acc, question) => {
+      const key = `answer${question.id}` as `answer${string}`;
+      acc[key] = yup
+        .string()
+        .required(NO_TEXT_ERROR_MESSAGE)
+        .max(MAX_LENGTH, `${MAX_LENGTH}${MAX_LENGTH_ERROR_MESSAGE}`);
+      return acc;
+    },
+    {} as Record<
+      `answer${string}`,
+      yup.StringSchema<string | undefined, yup.AnyObject>
+    >
   );
 
   watch();
-  const onSubmit: SubmitHandler<Answers> = textAreaData => {
+  const onSubmit: SubmitHandler<Answers> = async textAreaData => {
     const textAreaAnswers = TextAreaQuestions.map((question: Question) => {
       const key = `answer${question.id}` as keyof Answers;
       const answer = key.length > 0 ? textAreaData[key] : null;
-      // question.answer?.textArea = answer;
+      if (question.answer) {
+        question.answer.textArea = answer;
+      }
+      return question;
+    });
+    const checkBoxAnswers = CheckBoxQuestions.map((question: Question) => {
+      const answer = checkBoxInputState[question.id];
+      if (question.answer) {
+        question.answer.optionState = answer.checkedState;
+        if (answer.isChecked) question.answer.inputText = answer.inputText;
+        else question.answer.inputText = '';
+      }
       return question;
     });
     const data = {
-      textArea: textAreaData,
-      checkBox: checkBoxInputState,
+      textAreaAnswers,
+      checkBoxAnswers,
     };
-    API.submit(data);
+    await API.submit(data);
   };
 
-  const handleCheck = useCallback((id: number, checked: boolean) => {
+  const handleCheck = useCallback((id: string, checked: boolean) => {
     setCheckBoxInputState(prevState => {
-      const newState = [...prevState];
+      const newState = { ...prevState };
       newState[id] = {
         ...newState[id],
         isChecked: checked,
@@ -96,9 +130,9 @@ export const Form: React.FC = () => {
     });
   }, []);
 
-  const handleCheckedState = useCallback((id: number, index: number) => {
+  const handleCheckedState = useCallback((id: string, index: number) => {
     setCheckBoxInputState(prevState => {
-      const newState = [...prevState];
+      const newState = { ...prevState };
       newState[id] = {
         ...newState[id],
         checkedState: [
@@ -111,9 +145,9 @@ export const Form: React.FC = () => {
     });
   }, []);
 
-  const handleTextInput = useCallback((id: number, textInput: string) => {
+  const handleTextInput = useCallback((id: string, textInput: string) => {
     setCheckBoxInputState(prevState => {
-      const newState = [...prevState];
+      const newState = { ...prevState };
       newState[id] = {
         ...newState[id],
         inputText: textInput,
@@ -127,36 +161,38 @@ export const Form: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <NavBar buttonText="回答を保存" />
         <div className="w-full max-w-[1280px] bg-gray-100 pt-10 px-[120px]">
-          {(TextAreaQuestions as Question[]).map((question: Question) => (
-            <div key={question.id} className="pb-7">
-              <TextAreaCard
-                questionNumber={question.questionNumber}
-                questionSentence={question.questionSentence}
-                questionTitle={question.questionTitle}
-                control={control}
-                trigger={trigger}
-                errors={errors}
-                index={question.id}
-              />
-            </div>
-          ))}
-          {(CheckBoxQuestions as Question[]).map(
-            (question: Question, index: number) => (
-              <div key={question.id} className="pb-7">
-                <CheckBoxCard
-                  questionNumber={question.questionNumber}
-                  questionSentence={question.questionSentence}
-                  questionTitle={question.questionTitle}
-                  id={index}
-                  options={question.options}
-                  handleCheckedState={handleCheckedState}
-                  handleTextInput={handleTextInput}
-                  isChecked={checkBoxInputState[index].isChecked}
-                  handleCheck={handleCheck}
-                />
-              </div>
-            )
-          )}
+          {(Questions as Question[]).map((question: Question) => {
+            if (question.qaFormat === 'TEXT')
+              return (
+                <div key={question.id} className="pb-7">
+                  <TextAreaCard
+                    questionNumber={question.questionNumber}
+                    questionSentence={question.questionSentence}
+                    questionTitle={question.questionTitle}
+                    control={control}
+                    trigger={trigger}
+                    errors={errors}
+                    index={question.id}
+                  />
+                </div>
+              );
+            if (question.qaFormat === 'CHECKBOX')
+              return (
+                <div key={question.id} className="pb-7">
+                  <CheckBoxCard
+                    questionNumber={question.questionNumber}
+                    questionSentence={question.questionSentence}
+                    questionTitle={question.questionTitle}
+                    id={question.id}
+                    options={question.options}
+                    handleCheckedState={handleCheckedState}
+                    handleTextInput={handleTextInput}
+                    isChecked={checkBoxInputState[question.id].isChecked}
+                    handleCheck={handleCheck}
+                  />
+                </div>
+              );
+          })}
         </div>
       </form>
     </div>

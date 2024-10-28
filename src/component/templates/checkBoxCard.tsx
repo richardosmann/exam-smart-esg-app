@@ -7,12 +7,12 @@ interface CheckBoxCardProps {
   questionNumber?: string | null;
   questionTitle?: string | null;
   questionSentence: string;
-  id: number;
+  id: string;
   options: string[];
-  handleCheckedState: (id: number, index: number) => void;
-  handleTextInput: (id: number, textInuput: string) => void;
+  handleCheckedState: (id: string, index: number) => void;
+  handleTextInput: (id: string, textInuput: string) => void;
   isChecked: boolean;
-  handleCheck: (id: number, checked: boolean) => void;
+  handleCheck: (id: string, checked: boolean) => void;
 }
 
 export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
@@ -37,7 +37,7 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
   return (
     <div>
       <Card>
-        <div className="flex flex-col w-full max-x-[992px] h-auto min-h-[60px] my-6">
+        <div className="flex flex-col w-full max-x-[992px] h-auto min-h-[60px] mb-6">
           <div className="font-normal text-xs mb-2 text-gray-400">
             {questionNumber} {questionTitle}
           </div>
@@ -52,7 +52,6 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
               <CheckBox
                 id={checkBoxKey}
                 name={option}
-                value={option}
                 handleCheck={() => handleCheckedState(id, index)}
               />
               <label htmlFor={checkBoxKey} className="py-[9px] cursor-pointer">
@@ -63,7 +62,6 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
         })}
         <CheckBoxInput
           name=""
-          value=""
           isChecked={isChecked}
           handleCheck={handleChangeCheck}
           handleTextInput={handleChangeTextInput}

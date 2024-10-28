@@ -27,7 +27,7 @@ export const TextAreaCard: React.FC<TextAreaCardProps> = ({
   return (
     <div>
       <Card>
-        <div className="flex flex-col w-full max-x-[992px] h-auto min-h-[60px] my-6">
+        <div className="flex flex-col w-full max-x-[992px] h-auto min-h-[60px] mb-6">
           <div className="font-normal text-xs mb-2 text-gray-400">
             {questionNumber} {questionTitle}
           </div>

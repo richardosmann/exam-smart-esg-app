@@ -3,16 +3,10 @@ import React, { useState } from 'react';
 interface CheckBoxProps {
   id: string;
   name: string;
-  value: string;
   handleCheck: (checked: boolean) => void;
 }
 
-const CheckBox: React.FC<CheckBoxProps> = ({
-  id,
-  name,
-  value,
-  handleCheck,
-}) => {
+const CheckBox: React.FC<CheckBoxProps> = ({ id, name, handleCheck }) => {
   const [isChecked, setIsChecked] = useState<boolean>(false);
 
   const handleChange = () => {
@@ -26,7 +20,6 @@ const CheckBox: React.FC<CheckBoxProps> = ({
         <input
           id={id}
           name={name}
-          value={value}
           type="checkbox"
           className="peer h-[18px] w-[18px] cursor-pointer appearance-none border-2 border-gray-400 rounded checked:bg-emerald-700 checked:border-emerald-700 dark:bg-emerald-700 dark:border-emerald-700 transition-all duration-200"
           checked={isChecked}

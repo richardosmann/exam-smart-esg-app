@@ -21,7 +21,7 @@ const TextInput: React.FC<TextInputProps> = ({
 
   const colorClass = useMemo(() => {
     if (disabled) return 'border-b-[1px] border-gray-400';
-    return 'border-b-2 border-emerald-700';
+    return 'border-b border-emerald-700';
   }, [disabled]);
 
   const textInputClasses = classNames(

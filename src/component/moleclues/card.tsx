@@ -8,14 +8,13 @@ export const Card: React.FC<CardProps> = ({ children }) => {
   return (
     <div
       tabIndex={0}
-      className="max-w-[1040px] w-full min-h-[259px] h-auto 
-      border rounded-lg border-gray-400 bg-gray-50
-      focus:outline-none focus:min-h-[313px] focus:h-auto focus:border-none focus:ring-2 focus:ring-emerald-700 
-      focus-within:outline-none focus-within:min-h-[313px] focus-within:h-auto focus-within:border-none focus-within:ring-2 focus-within:ring-emerald-700 
-      transition-all group px-6 pb-6"
+      className="max-w-[1040px] w-full min-h-[259px] h-auto py-6 rounded-lg bg-gray-50 shadow-sm shadow-gray-400
+      focus:outline-none focus:min-h-[313px] focus:h-auto focus:border-none focus:ring-1 focus:ring-emerald-700 focus:shadow-2xl
+      focus-within:outline-none focus-within:min-h-[313px] focus-within:h-auto focus-within:border-none focus-within:ring-1 focus-within:ring-emerald-700 focus-within:shadow-lg 
+      transition-all group"
     >
-      <div>
-        <div className="py-6 border-b border-gray-400 hidden group-focus:block group-focus-within:block transition-all">
+      <div className="">
+        <div className="pl-6 pb-6 border-b border-gray-400 hidden group-focus:block group-focus-within:block transition-all">
           <a href="#">
             <div className="flex">
               <svg
@@ -38,7 +37,9 @@ export const Card: React.FC<CardProps> = ({ children }) => {
             </div>
           </a>
         </div>
-        <div>{children}</div>
+        <div className="mx-6 focus-within:mt-6 group-focus:mt-6">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
       : 'text-gray-400';
 
   const textAreaClasses = classNames(
-    'w-full min-h-[104px] h-auto px-3 py-4 border rounded resize-none focus:outline-none focus:ring-1 transition-all',
+    'w-full h-[104px] overflow-y-auto px-3 py-4 border rounded resize-none focus:outline-none transition-all focus:h-[263px] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-500',
     `${textAreaColorClass}`
   );
 
