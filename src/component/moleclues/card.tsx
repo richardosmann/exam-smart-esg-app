@@ -10,7 +10,8 @@ export const Card: React.FC<CardProps> = ({ children }) => {
       tabIndex={0}
       className="max-w-[1040px] w-full min-h-[259px] h-auto py-6 rounded-lg bg-gray-50 shadow-sm shadow-gray-400
       focus:outline-none focus:min-h-[313px] focus:h-auto focus:border-none focus:ring-1 focus:ring-emerald-700 focus:shadow-md focus:shadow-gray-500
-      focus-within:outline-none focus-within:min-h-[313px] focus-within:h-auto focus-within:border-none focus-within:ring-1 focus-within:ring-emerald-700 focus-within:shadow-lg 
+      focus-within:outline-none focus-within:min-h-[313px] focus-within:h-auto focus-within:border-none focus-within:ring-1 focus-within:ring-emerald-700 focus-within:shadow-md focus-within:shadow-gray-500
+      group-focus:shadow-md group-focus:shadow-gray-500 group-focus-within:shadow-md group-focus-within:shadow-gray-500 
       transition-all group"
     >
       <div className="">
