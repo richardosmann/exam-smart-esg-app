@@ -15,10 +15,6 @@ import {
 } from '../../constants';
 import { API } from '../../API';
 
-const CHECKBOX_QUESTIONS = (Questions as Question[]).filter(
-  (question: Question) => question.qaFormat === QAFormat.CHECKBOX
-);
-
 const dynamicSchema = Questions.reduce(
   (acc, question) => {
     if (question.qaFormat === QAFormat.TEXT) {
@@ -67,7 +63,6 @@ export const Form: React.FC = () => {
     control,
     trigger,
     formState: { errors },
-    watch,
     handleSubmit,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
