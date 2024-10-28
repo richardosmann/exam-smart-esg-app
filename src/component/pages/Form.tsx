@@ -14,10 +14,10 @@ import {
 } from '../../constants';
 import { API } from '../../API';
 
-const TextAreaQuestions = (Questions as Question[]).filter(
+const TEXT_QUESTIONS = (Questions as Question[]).filter(
   (question: Question) => question.qaFormat === QAFormat.TEXT
 );
-const CheckBoxQuestions = (Questions as Question[]).filter(
+const CHECKBOX_QUESTIONS = (Questions as Question[]).filter(
   (question: Question) => question.qaFormat === QAFormat.CHECKBOX
 );
 
@@ -26,10 +26,10 @@ export interface Answers {
 }
 
 export interface CheckBoxAnswers {
-  [key: string]: CheckBoxCardInputProps;
+  [key: string]: CheckBoxAnswerProps;
 }
 
-const dynamicSchema = TextAreaQuestions.reduce(
+const dynamicSchema = TEXT_QUESTIONS.reduce(
   (acc, question) => {
     const key = `answer${question.id}` as `answer${string}`;
     acc[key] = yup
@@ -46,7 +46,7 @@ const dynamicSchema = TextAreaQuestions.reduce(
 
 const schema = yup.object().shape(dynamicSchema);
 
-interface CheckBoxCardInputProps {
+interface CheckBoxAnswerProps {
   checkedState: boolean[];
   isChecked: boolean;
   inputText: string;
@@ -64,8 +64,10 @@ export const Form: React.FC = () => {
     mode: 'all',
   });
 
-  const [checkBoxInputState, setCheckBoxInputState] = useState<CheckBoxAnswers>(
-    CheckBoxQuestions.reduce(
+  const [checkBoxAnswers, setCheckBoxAnswers] = useState<
+    Record<string, CheckBoxAnswerProps>
+  >(
+    CHECKBOX_QUESTIONS.reduce(
       (box, question) => {
         box[question.id] = {
           checkedState: new Array(question.options.length).fill(false),
@@ -74,73 +76,70 @@ export const Form: React.FC = () => {
         };
         return box;
       },
-      {} as Record<string, CheckBoxCardInputProps>
+      {} as Record<string, CheckBoxAnswerProps>
     )
   );
 
   watch();
+
   const onSubmit: SubmitHandler<Answers> = useCallback(
     async textAreaData => {
       const answers = (Questions as Question[]).map((question: Question) => {
         if (question.qaFormat === QAFormat.TEXT) {
           const key = `answer${question.id}` as keyof Answers;
-          const answer = key.length > 0 ? textAreaData[key] : null;
-          if (question.answer) {
-            question.answer.textArea = answer;
-          }
-          return question;
+          question.answer = {
+            ...question.answer,
+            textArea: textAreaData[key],
+          };
+        } else if (question.qaFormat === QAFormat.CHECKBOX) {
+          const answer = checkBoxAnswers[question.id];
+          question.answer = {
+            ...question.answer,
+            optionState: answer.checkedState,
+            inputText: answer.isChecked ? answer.inputText : '',
+          };
         }
-        if (question.qaFormat === QAFormat.CHECKBOX) {
-          const answer = checkBoxInputState[question.id];
-          if (question.answer) {
-            question.answer.optionState = answer.checkedState;
-            if (answer.isChecked) question.answer.inputText = answer.inputText;
-            else question.answer.inputText = '';
-          }
-          return question;
-        }
+        return question;
       });
       await API.submit(answers);
     },
-    [checkBoxInputState]
+    [checkBoxAnswers]
   );
 
-  const handleCheck = useCallback((id: string, checked: boolean) => {
-    setCheckBoxInputState(prevState => {
-      const newState = { ...prevState };
-      newState[id] = {
-        ...newState[id],
-        isChecked: checked,
-      };
-      return newState;
-    });
-  }, []);
+  const updateCheckBoxState = useCallback(
+    (id: string, update: Partial<CheckBoxAnswerProps>) => {
+      setCheckBoxAnswers(prev => ({
+        ...prev,
+        [id]: { ...prev[id], ...update },
+      }));
+    },
+    []
+  );
 
-  const handleCheckedState = useCallback((id: string, index: number) => {
-    setCheckBoxInputState(prevState => {
-      const newState = { ...prevState };
-      newState[id] = {
-        ...newState[id],
-        checkedState: [
-          ...newState[id].checkedState.slice(0, index),
-          !newState[id].checkedState[index],
-          ...newState[id].checkedState.slice(index + 1),
-        ],
-      };
-      return newState;
-    });
-  }, []);
+  const handleCheck = useCallback(
+    (id: string, checked: boolean) => {
+      updateCheckBoxState(id, { isChecked: checked });
+    },
+    [updateCheckBoxState]
+  );
 
-  const handleTextInput = useCallback((id: string, textInput: string) => {
-    setCheckBoxInputState(prevState => {
-      const newState = { ...prevState };
-      newState[id] = {
-        ...newState[id],
-        inputText: textInput,
-      };
-      return newState;
-    });
-  }, []);
+  const handleCheckedState = useCallback(
+    (id: string, index: number) => {
+      updateCheckBoxState(id, {
+        checkedState: checkBoxAnswers[id].checkedState.map((state, idx) =>
+          idx === index ? !state : state
+        ),
+      });
+    },
+    [checkBoxAnswers, updateCheckBoxState]
+  );
+
+  const handleTextInput = useCallback(
+    (id: string, textInput: string) => {
+      updateCheckBoxState(id, { inputText: textInput });
+    },
+    [updateCheckBoxState]
+  );
 
   return (
     <div className="max-w-[1280px] w-full mx-auto">
@@ -173,7 +172,7 @@ export const Form: React.FC = () => {
                     options={question.options}
                     handleCheckedState={handleCheckedState}
                     handleTextInput={handleTextInput}
-                    isChecked={checkBoxInputState[question.id].isChecked}
+                    isChecked={checkBoxAnswers[question.id].isChecked}
                     handleCheck={handleCheck}
                   />
                 </div>
