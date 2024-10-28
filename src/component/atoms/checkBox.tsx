@@ -30,6 +30,7 @@ const CheckBox: React.FC<CheckBoxProps> = ({
                 type="checkbox"
                 className="peer h-[18px] w-[18px] cursor-pointer appearance-none border-2 border-gray-400 rounded checked:bg-emerald-700 checked:border-emerald-700 dark:bg-emerald-700 dark:border-emerald-700 transition-all duration-200"
                 checked={field.value}
+                onBlur={() => trigger(`checkbox${questionId}`)}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                   field.onChange(event.target.checked);
                   trigger(`checkbox${questionId}`);

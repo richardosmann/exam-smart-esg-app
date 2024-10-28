@@ -69,6 +69,11 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
             {errors[`checkbox${questionId}`]?.root?.message as string}
           </div>
         )}
+        {(errors[`checkbox${questionId}`]?.message as string) && (
+          <div className="h-[20px] text-sm mt-[3px] px-[14px] text-red-500">
+            {errors[`checkbox${questionId}`]?.message as string}
+          </div>
+        )}
       </Card>
     </div>
   );
