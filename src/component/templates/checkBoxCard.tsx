@@ -49,7 +49,6 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
                 index={index}
                 control={control}
                 trigger={trigger}
-                errors={errors}
               />
               <label htmlFor={key} className="py-[9px] cursor-pointer">
                 {option}
@@ -63,7 +62,6 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
           index={options.length}
           control={control}
           trigger={trigger}
-          errors={errors}
           optionState={watchedCheckBox}
         />
         {(errors[`checkbox${questionId}`]?.root?.message as string) && (

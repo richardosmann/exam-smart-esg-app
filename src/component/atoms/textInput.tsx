@@ -7,7 +7,7 @@ interface TextInputProps {
   questionId: string;
   placeholder: string;
   control: Control<FormValues>;
-  disabled: boolean | undefined;
+  disabled?: boolean;
 }
 
 const TextInput: React.FC<TextInputProps> = ({

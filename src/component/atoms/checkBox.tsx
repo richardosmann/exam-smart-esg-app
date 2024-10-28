@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control, Controller, FieldErrors } from 'react-hook-form';
+import { Control, Controller } from 'react-hook-form';
 import { FormValues } from '../pages/Form';
 
 interface CheckBoxProps {
@@ -8,7 +8,6 @@ interface CheckBoxProps {
   index: number;
   control: Control<FormValues>;
   trigger: (name?: keyof FormValues) => Promise<boolean>;
-  errors: FieldErrors<FormValues>;
 }
 
 const CheckBox: React.FC<CheckBoxProps> = ({
@@ -17,7 +16,6 @@ const CheckBox: React.FC<CheckBoxProps> = ({
   index,
   control,
   trigger,
-  errors,
 }) => {
   return (
     <div className="w-[42px] h-[42px] p-3">
