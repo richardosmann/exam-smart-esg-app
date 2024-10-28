@@ -1,27 +1,42 @@
 import React from 'react';
+import { Control, FieldErrors } from 'react-hook-form';
 import CheckBox from '../atoms/checkBox';
 import TextInput from '../atoms/textInput';
-
+import { FormValues } from '../pages/Form';
 interface CheckBoxInput {
-  name: string;
-  isChecked: boolean;
-  handleCheck: (checked: boolean) => void;
-  handleTextInput: (textInput: string) => void;
+  id: string;
+  questionId: string;
+  index: number;
+  control: Control<FormValues>;
+  trigger: (name?: keyof FormValues) => Promise<boolean>;
+  errors: FieldErrors<FormValues>;
+  optionState: boolean[];
 }
 
 export const CheckBoxInput: React.FC<CheckBoxInput> = ({
-  name,
-  isChecked,
-  handleCheck,
-  handleTextInput,
+  id,
+  questionId,
+  index,
+  control,
+  trigger,
+  errors,
+  optionState,
 }) => {
   return (
     <div className="flex">
-      <CheckBox id={name} name={name} handleCheck={handleCheck} />
+      <CheckBox
+        id={id}
+        questionId={questionId}
+        index={index}
+        control={control}
+        trigger={trigger}
+        errors={errors}
+      />
       <TextInput
+        questionId={questionId}
         placeholder="その他"
-        handleTextInput={handleTextInput}
-        disabled={!isChecked}
+        control={control}
+        disabled={!optionState.at(-1)}
       />
     </div>
   );

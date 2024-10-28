@@ -1,24 +1,21 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
+import { Controller, Control } from 'react-hook-form';
 import classNames from 'classnames';
+import { FormValues } from '../pages/Form';
 
 interface TextInputProps {
+  questionId: string;
   placeholder: string;
-  handleTextInput(textInput: string): void;
-  disabled: boolean;
+  control: Control<FormValues>;
+  disabled: boolean | undefined;
 }
 
 const TextInput: React.FC<TextInputProps> = ({
+  questionId,
   placeholder,
-  handleTextInput,
+  control,
   disabled,
 }) => {
-  const [inputValue, setInputValue] = useState<string>('');
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(event.target.value);
-    handleTextInput(event.target.value);
-  };
-
   const colorClass = useMemo(() => {
     if (disabled) return 'border-b-[1px] border-gray-400';
     return 'border-b border-emerald-700';
@@ -31,13 +28,20 @@ const TextInput: React.FC<TextInputProps> = ({
 
   return (
     <div className="w-full max-w-[950px] h-auto min-h-[42px] my-1">
-      <input
-        type="text"
-        value={inputValue}
-        onChange={handleChange}
-        className={textInputClasses}
-        placeholder={placeholder}
-        disabled={disabled}
+      <Controller
+        name={`checkboxinput${questionId}`}
+        control={control}
+        render={({ field }) => {
+          return (
+            <input
+              {...field}
+              type="text"
+              className={textInputClasses}
+              placeholder={placeholder}
+              disabled={disabled}
+            />
+          );
+        }}
       />
     </div>
   );

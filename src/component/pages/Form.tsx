@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { NavBar } from '../moleclues/navBar';
 import { TextAreaCard } from '../templates/textAreaCard';
 import { CheckBoxCard } from '../templates/checkBoxCard';
@@ -11,46 +11,56 @@ import {
   NO_TEXT_ERROR_MESSAGE,
   MAX_LENGTH_ERROR_MESSAGE,
   MAX_LENGTH,
+  NO_CHECK_ERROR_MESSAGE,
 } from '../../constants';
 import { API } from '../../API';
 
-const TEXT_QUESTIONS = (Questions as Question[]).filter(
-  (question: Question) => question.qaFormat === QAFormat.TEXT
-);
 const CHECKBOX_QUESTIONS = (Questions as Question[]).filter(
   (question: Question) => question.qaFormat === QAFormat.CHECKBOX
 );
 
-export interface Answers {
-  [key: `answer${string}`]: string | undefined;
-}
-
-export interface CheckBoxAnswers {
-  [key: string]: CheckBoxAnswerProps;
-}
-
-const dynamicSchema = TEXT_QUESTIONS.reduce(
+const dynamicSchema = Questions.reduce(
   (acc, question) => {
-    const key = `answer${question.id}` as `answer${string}`;
-    acc[key] = yup
-      .string()
-      .required(NO_TEXT_ERROR_MESSAGE)
-      .max(MAX_LENGTH, `${MAX_LENGTH}${MAX_LENGTH_ERROR_MESSAGE}`);
+    if (question.qaFormat === QAFormat.TEXT) {
+      const key = `answer${question.id}` as `answer${string}`;
+      acc[key] = z
+        .string()
+        .min(1, { message: NO_TEXT_ERROR_MESSAGE })
+        .max(MAX_LENGTH, `${MAX_LENGTH}${MAX_LENGTH_ERROR_MESSAGE}`);
+    } else if (question.qaFormat === QAFormat.CHECKBOX) {
+      const key = `checkbox${question.id}` as `checkbox${string}`;
+      acc[key] = z.array(z.boolean()).refine(values => values.some(Boolean), {
+        message: NO_CHECK_ERROR_MESSAGE,
+      });
+      const inputkey =
+        `checkboxinput${question.id}` as `checkboxinput${string}`;
+      acc[inputkey] = z.string();
+    }
     return acc;
   },
-  {} as Record<
-    `answer${string}`,
-    yup.StringSchema<string | undefined, yup.AnyObject>
-  >
+  {} as Record<`answer${string}` | `checkbox${string}`, z.ZodTypeAny>
 );
 
-const schema = yup.object().shape(dynamicSchema);
+const schema = z.object(dynamicSchema);
 
-interface CheckBoxAnswerProps {
-  checkedState: boolean[];
-  isChecked: boolean;
-  inputText: string;
-}
+export type FormValues = z.infer<typeof schema>;
+
+const dynamicDefaultValues = Questions.reduce(
+  (acc, question) => {
+    if (question.qaFormat === QAFormat.TEXT) {
+      const key = `answer${question.id}` as `answer${string}`;
+      acc[key] = '';
+    } else if (question.qaFormat === QAFormat.CHECKBOX) {
+      const key = `checkbox${question.id}` as `checkbox${string}`;
+      acc[key] = new Array(question.options.length + 1).fill(false);
+      const inputkey =
+        `checkboxinput${question.id}` as `checkboxinput${string}`;
+      acc[inputkey] = '';
+    }
+    return acc;
+  },
+  {} as Record<`answer${string}` | `checkbox${string}`, string | boolean[]>
+);
 
 export const Form: React.FC = () => {
   const {
@@ -59,87 +69,15 @@ export const Form: React.FC = () => {
     formState: { errors },
     watch,
     handleSubmit,
-  } = useForm<Answers>({
-    resolver: yupResolver(schema),
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
     mode: 'all',
+    defaultValues: dynamicDefaultValues,
   });
 
-  const [checkBoxAnswers, setCheckBoxAnswers] = useState<
-    Record<string, CheckBoxAnswerProps>
-  >(
-    CHECKBOX_QUESTIONS.reduce(
-      (box, question) => {
-        box[question.id] = {
-          checkedState: new Array(question.options.length).fill(false),
-          isChecked: false,
-          inputText: '',
-        };
-        return box;
-      },
-      {} as Record<string, CheckBoxAnswerProps>
-    )
-  );
-
-  watch();
-
-  const onSubmit: SubmitHandler<Answers> = useCallback(
-    async textAreaData => {
-      const answers = (Questions as Question[]).map((question: Question) => {
-        if (question.qaFormat === QAFormat.TEXT) {
-          const key = `answer${question.id}` as keyof Answers;
-          question.answer = {
-            ...question.answer,
-            textArea: textAreaData[key],
-          };
-        } else if (question.qaFormat === QAFormat.CHECKBOX) {
-          const answer = checkBoxAnswers[question.id];
-          question.answer = {
-            ...question.answer,
-            optionState: answer.checkedState,
-            inputText: answer.isChecked ? answer.inputText : '',
-          };
-        }
-        return question;
-      });
-      await API.submit(answers);
-    },
-    [checkBoxAnswers]
-  );
-
-  const updateCheckBoxState = useCallback(
-    (id: string, update: Partial<CheckBoxAnswerProps>) => {
-      setCheckBoxAnswers(prev => ({
-        ...prev,
-        [id]: { ...prev[id], ...update },
-      }));
-    },
-    []
-  );
-
-  const handleCheck = useCallback(
-    (id: string, checked: boolean) => {
-      updateCheckBoxState(id, { isChecked: checked });
-    },
-    [updateCheckBoxState]
-  );
-
-  const handleCheckedState = useCallback(
-    (id: string, index: number) => {
-      updateCheckBoxState(id, {
-        checkedState: checkBoxAnswers[id].checkedState.map((state, idx) =>
-          idx === index ? !state : state
-        ),
-      });
-    },
-    [checkBoxAnswers, updateCheckBoxState]
-  );
-
-  const handleTextInput = useCallback(
-    (id: string, textInput: string) => {
-      updateCheckBoxState(id, { inputText: textInput });
-    },
-    [updateCheckBoxState]
-  );
+  const onSubmit: SubmitHandler<FormValues> = useCallback(async data => {
+    await API.submit(data);
+  }, []);
 
   return (
     <div className="max-w-[1280px] w-full mx-auto">
@@ -154,10 +92,10 @@ export const Form: React.FC = () => {
                     questionNumber={question.questionNumber}
                     questionSentence={question.questionSentence}
                     questionTitle={question.questionTitle}
+                    questionId={question.id}
                     control={control}
                     trigger={trigger}
                     errors={errors}
-                    index={question.id}
                   />
                 </div>
               );
@@ -168,12 +106,11 @@ export const Form: React.FC = () => {
                     questionNumber={question.questionNumber}
                     questionSentence={question.questionSentence}
                     questionTitle={question.questionTitle}
-                    id={question.id}
+                    questionId={question.id}
+                    control={control}
+                    trigger={trigger}
+                    errors={errors}
                     options={question.options}
-                    handleCheckedState={handleCheckedState}
-                    handleTextInput={handleTextInput}
-                    isChecked={checkBoxAnswers[question.id].isChecked}
-                    handleCheck={handleCheck}
                   />
                 </div>
               );

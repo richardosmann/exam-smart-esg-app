@@ -3,26 +3,26 @@ import { Control, FieldErrors } from 'react-hook-form';
 import { TextArea } from '../atoms/textArea';
 import { Card } from '../moleclues/card';
 import { MAX_LENGTH } from '../../constants';
-import { Answers } from '../pages/Form';
+import { FormValues } from '../pages/Form';
 
 interface TextAreaCardProps {
   questionNumber?: string | null;
   questionTitle?: string | null;
   questionSentence: string;
-  control: Control<Answers>;
-  trigger: (name?: keyof Answers) => Promise<boolean>;
-  errors: FieldErrors<Answers>;
-  index: string;
+  questionId: string;
+  control: Control<FormValues>;
+  trigger: (name?: keyof FormValues) => Promise<boolean>;
+  errors: FieldErrors<FormValues>;
 }
 
 export const TextAreaCard: React.FC<TextAreaCardProps> = ({
   questionNumber,
   questionTitle,
   questionSentence,
+  questionId,
   control,
   trigger,
   errors,
-  index,
 }) => {
   return (
     <div>
@@ -41,7 +41,7 @@ export const TextAreaCard: React.FC<TextAreaCardProps> = ({
           control={control}
           trigger={trigger}
           errors={errors}
-          index={index}
+          questionId={questionId}
         />
       </Card>
     </div>

@@ -1,44 +1,32 @@
-import React, { useCallback } from 'react';
+import React from 'react';
+import { Control, FieldErrors, useWatch } from 'react-hook-form';
 import { Card } from '../moleclues/card';
 import { CheckBoxInput } from '../moleclues/checkBoxInput';
 import CheckBox from '../atoms/checkBox';
+import { FormValues } from '../pages/Form';
 
 interface CheckBoxCardProps {
   questionNumber?: string | null;
   questionTitle?: string | null;
   questionSentence: string;
-  id: string;
+  questionId: string;
+  control: Control<FormValues>;
+  trigger: (name?: keyof FormValues) => Promise<boolean>;
+  errors: FieldErrors<FormValues>;
   options: string[];
-  handleCheckedState: (id: string, index: number) => void;
-  handleTextInput: (id: string, textInuput: string) => void;
-  isChecked: boolean;
-  handleCheck: (id: string, checked: boolean) => void;
 }
 
 export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
   questionNumber,
   questionSentence,
   questionTitle,
-  id,
+  questionId,
+  control,
+  trigger,
+  errors,
   options,
-  handleCheckedState,
-  handleTextInput,
-  isChecked,
-  handleCheck,
 }) => {
-  const handleChangeCheck = useCallback(
-    (checked: boolean) => {
-      handleCheck(id, checked);
-    },
-    [handleCheck, id]
-  );
-
-  const handleChangeTextInput = useCallback(
-    (textInput: string) => {
-      handleTextInput(id, textInput);
-    },
-    [handleTextInput, id]
-  );
+  const watchedCheckBox = useWatch({ name: `checkbox${questionId}`, control });
 
   return (
     <div>
@@ -52,26 +40,37 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
           </div>
         </div>
         {(options as string[]).map((option: string, index: number) => {
-          const checkBoxKey = `${questionNumber}_${option}`;
+          const key = `${questionId}${option}`;
           return (
             <div key={option} className="flex">
               <CheckBox
-                id={checkBoxKey}
-                name={option}
-                handleCheck={() => handleCheckedState(id, index)}
+                id={key}
+                questionId={questionId}
+                index={index}
+                control={control}
+                trigger={trigger}
+                errors={errors}
               />
-              <label htmlFor={checkBoxKey} className="py-[9px] cursor-pointer">
+              <label htmlFor={key} className="py-[9px] cursor-pointer">
                 {option}
               </label>
             </div>
           );
         })}
         <CheckBoxInput
-          name=""
-          isChecked={isChecked}
-          handleCheck={handleChangeCheck}
-          handleTextInput={handleChangeTextInput}
+          id={`${questionId}option`}
+          questionId={questionId}
+          index={options.length}
+          control={control}
+          trigger={trigger}
+          errors={errors}
+          optionState={watchedCheckBox}
         />
+        {(errors[`checkbox${questionId}`]?.root?.message as string) && (
+          <div className="h-[20px] text-sm mt-[3px] px-[14px] text-red-500">
+            {errors[`checkbox${questionId}`]?.root?.message as string}
+          </div>
+        )}
       </Card>
     </div>
   );

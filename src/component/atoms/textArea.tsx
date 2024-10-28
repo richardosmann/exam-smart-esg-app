@@ -1,15 +1,16 @@
 import React, { useCallback, useState } from 'react';
 import classNames from 'classnames';
 import { Controller, Control, FieldErrors } from 'react-hook-form';
-import { Answers } from '../pages/Form';
+import { FormValues } from '../pages/Form';
+import { NO_TEXT_ERROR_MESSAGE } from '../../constants';
 
 interface TextAreaProps {
   placeholder: string;
   maxLength: number;
-  control: Control<Answers>;
-  trigger: (name?: keyof Answers) => Promise<boolean>;
-  errors: FieldErrors<Answers>;
-  index: string;
+  control: Control<FormValues>;
+  trigger: (name?: keyof FormValues) => Promise<boolean>;
+  errors: FieldErrors<FormValues>;
+  questionId: string;
 }
 
 export const TextArea: React.FC<TextAreaProps> = ({
@@ -18,28 +19,28 @@ export const TextArea: React.FC<TextAreaProps> = ({
   control,
   trigger,
   errors,
-  index,
+  questionId,
 }) => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
   const handleBlur = useCallback(() => {
     setIsFocused(false);
-    trigger(`answer${index}`);
-  }, [index, setIsFocused, trigger]);
+    trigger(`answer${questionId}`);
+  }, [questionId, setIsFocused, trigger]);
 
-  const labelColorClass = errors[`answer${index}`]
+  const labelColorClass = errors[`answer${questionId}`]
     ? 'text-red-500'
     : isFocused
       ? 'text-emerald-700'
       : 'text-gray-400';
 
-  const textAreaColorClass = errors[`answer${index}`]
+  const textAreaColorClass = errors[`answer${questionId}`]
     ? 'border-red-500 focus:ring-red-500'
     : isFocused
       ? 'border-emerald-700 focus:ring-emerald-700'
       : 'border-gray-400 focus:ring-gray-400';
 
-  const charCountColorClass = errors[`answer${index}`]
+  const charCountColorClass = errors[`answer${questionId}`]
     ? 'text-red-500'
     : isFocused
       ? 'text-emerald-700'
@@ -58,7 +59,7 @@ export const TextArea: React.FC<TextAreaProps> = ({
   return (
     <div className="relative max-w-[992px] w-full min-h-[127px] h-auto">
       <Controller
-        name={`answer${index}`}
+        name={`answer${questionId}`}
         control={control}
         render={({ field }) => {
           const labelClasses = classNames(
@@ -83,8 +84,10 @@ export const TextArea: React.FC<TextAreaProps> = ({
               <label className={labelClasses}>{placeholder}</label>
               <div className={charCountClasses}>
                 <div>
-                  {errors[`answer${index}`] &&
-                    errors[`answer${index}`]?.message}
+                  {(errors[`answer${questionId}`]?.type as string) ===
+                  'invalid_type'
+                    ? NO_TEXT_ERROR_MESSAGE
+                    : (errors[`answer${questionId}`]?.message as string)}
                 </div>
                 <div>
                   {valueLength}/{maxLength}文字
