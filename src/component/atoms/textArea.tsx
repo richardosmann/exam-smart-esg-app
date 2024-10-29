@@ -84,10 +84,9 @@ export const TextArea: React.FC<TextAreaProps> = ({
               <label className={labelClasses}>{placeholder}</label>
               <div className={charCountClasses}>
                 <div>
-                  {(errors[`answer${questionId}`]?.type as string) ===
-                  'invalid_type'
+                  {errors[`answer${questionId}`]?.type === 'invalid_type'
                     ? NO_TEXT_ERROR_MESSAGE
-                    : (errors[`answer${questionId}`]?.message as string)}
+                    : errors[`answer${questionId}`]?.message?.toString()}
                 </div>
                 <div>
                   {valueLength}/{maxLength}文字

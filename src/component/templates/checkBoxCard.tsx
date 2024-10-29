@@ -6,14 +6,14 @@ import CheckBox from '../atoms/checkBox';
 import { FormValues } from '../pages/Form';
 
 interface CheckBoxCardProps {
-  questionNumber?: string | null;
-  questionTitle?: string | null;
   questionSentence: string;
   questionId: string;
   control: Control<FormValues>;
   trigger: (name?: keyof FormValues) => Promise<boolean>;
   errors: FieldErrors<FormValues>;
   options: string[];
+  questionNumber?: string | null;
+  questionTitle?: string | null;
 }
 
 export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
@@ -39,7 +39,7 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
             {questionSentence}
           </div>
         </div>
-        {(options as string[]).map((option: string, index: number) => {
+        {options.map((option, index: number) => {
           const key = `${questionId}${option}`;
           return (
             <div key={option} className="flex">
@@ -64,14 +64,14 @@ export const CheckBoxCard: React.FC<CheckBoxCardProps> = ({
           trigger={trigger}
           optionState={watchedCheckBox}
         />
-        {(errors[`checkbox${questionId}`]?.root?.message as string) && (
+        {errors[`checkbox${questionId}`]?.root?.message && (
           <div className="h-[20px] text-sm mt-[3px] px-[14px] text-red-500">
-            {errors[`checkbox${questionId}`]?.root?.message as string}
+            {errors[`checkbox${questionId}`]?.root?.message?.toString()}
           </div>
         )}
-        {(errors[`checkbox${questionId}`]?.message as string) && (
+        {errors[`checkbox${questionId}`]?.message && (
           <div className="h-[20px] text-sm mt-[3px] px-[14px] text-red-500">
-            {errors[`checkbox${questionId}`]?.message as string}
+            {errors[`checkbox${questionId}`]?.message?.toString()}
           </div>
         )}
       </Card>

@@ -6,13 +6,13 @@ import { MAX_LENGTH } from '../../constants';
 import { FormValues } from '../pages/Form';
 
 interface TextAreaCardProps {
-  questionNumber?: string | null;
-  questionTitle?: string | null;
   questionSentence: string;
   questionId: string;
   control: Control<FormValues>;
   trigger: (name?: keyof FormValues) => Promise<boolean>;
   errors: FieldErrors<FormValues>;
+  questionNumber?: string | null;
+  questionTitle?: string | null;
 }
 
 export const TextAreaCard: React.FC<TextAreaCardProps> = ({
