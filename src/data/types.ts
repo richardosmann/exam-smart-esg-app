@@ -21,7 +21,5 @@ export enum QAFormat {
 }
 
 export type Answer = {
-  textArea?: string | null; // テキストフォーマットの回答
-  optionState?: boolean[];
-  inputText?: string | null;
+  textFormat?: string | null; // テキストフォーマットの回答
 };

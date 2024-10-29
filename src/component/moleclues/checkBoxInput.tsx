@@ -1,5 +1,5 @@
 import React from 'react';
-import { Control } from 'react-hook-form';
+import { Control, FieldErrors } from 'react-hook-form';
 import CheckBox from '../atoms/checkBox';
 import TextInput from '../atoms/textInput';
 import { FormValues } from '../pages/Form';
@@ -9,7 +9,7 @@ interface CheckBoxInput {
   index: number;
   control: Control<FormValues>;
   trigger: (name?: keyof FormValues) => Promise<boolean>;
-  optionState: boolean[];
+  errors: FieldErrors<FormValues>;
 }
 
 export const CheckBoxInput: React.FC<CheckBoxInput> = ({
@@ -18,7 +18,7 @@ export const CheckBoxInput: React.FC<CheckBoxInput> = ({
   index,
   control,
   trigger,
-  optionState,
+  errors,
 }) => {
   return (
     <div className="flex">
@@ -33,7 +33,9 @@ export const CheckBoxInput: React.FC<CheckBoxInput> = ({
         questionId={questionId}
         placeholder="その他"
         control={control}
-        disabled={!optionState.at(-1)}
+        trigger={trigger}
+        errors={errors}
+        index={index}
       />
     </div>
   );

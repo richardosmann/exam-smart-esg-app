@@ -6,7 +6,7 @@ import { NavBar } from '../moleclues/navBar';
 import { TextAreaCard } from '../templates/textAreaCard';
 import { CheckBoxCard } from '../templates/checkBoxCard';
 import Questions from '../../data/questions1.json';
-import { QAFormat } from '../../data/types';
+import { QAFormat, Question } from '../../data/types';
 import {
   NO_TEXT_ERROR_MESSAGE,
   MAX_LENGTH_ERROR_MESSAGE,
@@ -32,15 +32,37 @@ const dynamicSchema = Questions.reduce(
         .refine(values => values.some(Boolean), {
           message: NO_CHECK_ERROR_MESSAGE,
         });
-      const inputkey = `checkboxinput${question.id}`;
-      acc[inputkey] = z.string();
+
+      const inputKey = `checkboxinput${question.id}`;
+      acc[inputKey] = z.string().optional();
     }
     return acc;
   },
   {}
 );
 
-const schema = z.object(dynamicSchema);
+const schema = z.object(dynamicSchema).superRefine((data, ctx) => {
+  Questions.forEach(question => {
+    if (question.qaFormat === QAFormat.CHECKBOX) {
+      const checkboxKey = `checkbox${question.id}`;
+      const inputKey = `checkboxinput${question.id}`;
+
+      const lastCheckboxValue =
+        data[checkboxKey]?.[data[checkboxKey].length - 1];
+
+      if (
+        lastCheckboxValue &&
+        (!data[inputKey] || data[inputKey].trim() === '')
+      ) {
+        ctx.addIssue({
+          path: [inputKey],
+          message: NO_TEXT_ERROR_MESSAGE,
+          code: z.ZodIssueCode.custom,
+        });
+      }
+    }
+  });
+});
 
 const dynamicDefaultValues = Questions.reduce(
   (acc: Record<string, string | boolean[]>, question) => {
@@ -71,7 +93,6 @@ export const Form: React.FC = () => {
   });
 
   const onSubmit: SubmitHandler<FormValues> = useCallback(async data => {
-    console.log(data);
     await API.submit(data);
   }, []);
 
@@ -85,10 +106,7 @@ export const Form: React.FC = () => {
               {question.qaFormat === QAFormat.TEXT && (
                 <div className="pb-7">
                   <TextAreaCard
-                    questionNumber={question.questionNumber}
-                    questionSentence={question.questionSentence}
-                    questionTitle={question.questionTitle}
-                    questionId={question.id}
+                    question={question as Question}
                     control={control}
                     trigger={trigger}
                     errors={errors}
@@ -98,14 +116,10 @@ export const Form: React.FC = () => {
               {question.qaFormat === QAFormat.CHECKBOX && (
                 <div className="pb-7">
                   <CheckBoxCard
-                    questionNumber={question.questionNumber}
-                    questionSentence={question.questionSentence}
-                    questionTitle={question.questionTitle}
-                    questionId={question.id}
+                    question={question as Question}
                     control={control}
                     trigger={trigger}
                     errors={errors}
-                    options={question.options}
                   />
                 </div>
               )}

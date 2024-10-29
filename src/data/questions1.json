@@ -7,9 +7,7 @@
     "qaFormat": "TEXT",
     "options": [],
     "answer": {
-      "textArea": "",
-      "optionState": [],
-      "inputText": ""
+      "textFormat": null
     }
   },
   {
@@ -20,9 +18,7 @@
     "qaFormat": "TEXT",
     "options": [],
     "answer": {
-      "textArea": "",
-      "optionState": [],
-      "inputText": ""
+      "textFormat": null
     }
   },
   {
@@ -33,9 +29,7 @@
     "qaFormat": "CHECKBOX",
     "options": ["選択肢A", "選択肢B"],
     "answer": {
-      "textArea": "",
-      "optionState": [],
-      "inputText": ""
+      "textFormat": null
     }
   },
   {
@@ -46,9 +40,7 @@
     "qaFormat": "TEXT",
     "options": [],
     "answer": {
-      "textArea": "",
-      "optionState": [],
-      "inputText": ""
+      "textFormat": null
     }
   },
   {
@@ -59,9 +51,7 @@
     "qaFormat": "CHECKBOX",
     "options": ["選択肢1", "選択肢2", "選択肢3"],
     "answer": {
-      "textArea": "",
-      "optionState": [],
-      "inputText": ""
+      "textFormat": null
     }
   }
 ]
